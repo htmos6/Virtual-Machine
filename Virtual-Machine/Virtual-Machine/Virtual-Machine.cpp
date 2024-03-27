@@ -2,11 +2,34 @@
 //
 
 #include <iostream>
+#include "CPU.h"
 
-int main()
+int main(int argc, const char* argv[])
 {
-    std::cout << "Hello World!\n";
+    CPU cpu;
+    cpu.memory[0x3000] = 0x15FB;
+    cpu.registers[R_7] = 8;
+
+    // cpu.memory[0x3000] = 0x15FB; ADD RO, R4, R5
+    // cpu.memory[0x3000] = 0x1105; ADD R2, R7, -5
+
+    cpu.RunVM();
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 // Run program: Ctrl + F5 or Debug > Start Without Debugging menu
 // Debug program: F5 or Debug > Start Debugging menu
