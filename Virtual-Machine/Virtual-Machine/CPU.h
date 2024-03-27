@@ -86,9 +86,10 @@ class CPU
         void UpdateFlags(uint16_t DR);
         
         void ADD(uint16_t instruction);
-        void LDI(uint16_t instruction);
         void AND(uint16_t instruction);
         void NOT(uint16_t instruction);
+
+        void LDI(uint16_t instruction);
         void BR(uint16_t instruction);
         void JMP(uint16_t instruction);
         void JSR(uint16_t instruction);

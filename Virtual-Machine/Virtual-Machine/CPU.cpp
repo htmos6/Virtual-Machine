@@ -132,7 +132,7 @@ void CPU::ADD(uint16_t instruction)
 
 
 /**
- * @brief Performs an bitwise AND operation based on the provided instruction.
+ * @brief Performs a bitwise AND operation based on the provided instruction.
  * @param instruction: The 16 bits instruction.
  */
 void CPU::AND(uint16_t instruction)
@@ -161,7 +161,7 @@ void CPU::AND(uint16_t instruction)
 
 
 /**
- * @brief Performs an bitwise NOT operation based on the provided instruction.
+ * @brief Performs a bitwise NOT operation based on the provided instruction.
  * @param instruction: The 16 bits instruction.
  */
 void CPU::NOT(uint16_t instruction)
@@ -177,4 +177,21 @@ void CPU::NOT(uint16_t instruction)
     registers[DR] = ~registers[SR1];
 
     UpdateFlags(DR);
+}
+
+
+/**
+ * @brief Performs a BRANCH operation based on the provided instruction.
+ * @param instruction: The 16 bits instruction.
+ */
+void CPU::BR(uint16_t instruction)
+{
+    uint16_t PCOffset = SignExtend(instruction & 0x01FF, 9);
+    uint16_t ConditionFlag = (instruction >> 9) & 0x0007;
+
+    if (ConditionFlag & registers[Registers::R_COND])
+    {
+        reg[R_PC] += pc_offset;
+    }
+    
 }
