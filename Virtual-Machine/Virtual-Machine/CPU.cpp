@@ -100,10 +100,9 @@ void CPU::UpdateFlags(uint16_t DR)
 }
 
 
-
 /**
  * @brief Performs an addition operation based on the provided instruction.
- * @param instruction: The 16 bits instruction.
+ * @param instruction The 16-bit instruction.
  */
 void CPU::ADD(uint16_t instruction)
 {
@@ -126,14 +125,14 @@ void CPU::ADD(uint16_t instruction)
         registers[DR] = registers[SR1] + registers[SR2];
     }
 
+    // Update condition flags based on the result in the destination register
     UpdateFlags(DR);
-    //std::cout << std::dec << registers[R_2] << std::dec;
 }
 
 
 /**
  * @brief Performs a bitwise AND operation based on the provided instruction.
- * @param instruction: The 16 bits instruction.
+ * @param instruction The 16-bit instruction.
  */
 void CPU::AND(uint16_t instruction)
 {
@@ -144,54 +143,68 @@ void CPU::AND(uint16_t instruction)
 
     if (Imm)
     {
-        // If Immediate Flag is set, extract immediate value and perform addition
+        // If Immediate Flag is set, extract immediate value and perform bitwise AND
         uint16_t imm5 = (instruction) & 0x001F;
         imm5 = SignExtend(imm5, 5);
         registers[DR] = registers[SR1] & imm5;
     }
     else
     {
-        // If Immediate Flag is not set, extract Source Register 2 (SR2) and perform addition
+        // If Immediate Flag is not set, extract Source Register 2 (SR2) and perform bitwise AND
         uint16_t SR2 = (instruction) & 0x0007; // Source Register 2
         registers[DR] = registers[SR1] & registers[SR2];
     }
 
+    // Update condition flags based on the result in the destination register
     UpdateFlags(DR);
 }
 
 
 /**
  * @brief Performs a bitwise NOT operation based on the provided instruction.
- * @param instruction: The 16 bits instruction.
+ * @param instruction The 16-bit instruction.
  */
 void CPU::NOT(uint16_t instruction)
 {
-
-    // Example:
-    // NOT R0, R1; Negate the value in register R1 and store the result in register R0
-    //
-    // Extract Destination Register (DR), Source Register 1 (SR1)
+    // Extract Destination Register (DR) and Source Register 1 (SR1)
     uint16_t DR = (instruction >> 9) & 0x0007; // Destination Register
     uint16_t SR1 = (instruction >> 6) & 0x0007; // Source Register 1
 
+    // Perform bitwise NOT operation on the value in source register and store it in destination register
     registers[DR] = ~registers[SR1];
 
+    // Update condition flags based on the result in the destination register
     UpdateFlags(DR);
 }
 
 
 /**
- * @brief Performs a BRANCH operation based on the provided instruction.
- * @param instruction: The 16 bits instruction.
+ * @brief Performs a branch operation based on the provided instruction.
+ * @param instruction The 16-bit instruction.
  */
 void CPU::BR(uint16_t instruction)
 {
+    // Extract PCOffset and Condition Flag
     uint16_t PCOffset = SignExtend(instruction & 0x01FF, 9);
     uint16_t ConditionFlag = (instruction >> 9) & 0x0007;
 
+    // Check if condition flag is set in the Condition Register, then update PC
     if (ConditionFlag & registers[Registers::R_COND])
     {
-        reg[R_PC] += pc_offset;
+        registers[Registers::R_PC] += PCOffset;
     }
-    
+}
+
+
+/**
+ * @brief Performs a jump operation based on the provided instruction.
+ * @param instruction The 16-bit instruction.
+ */
+void CPU::JMP(uint16_t instruction)
+{
+    // Extract Source Register (SR1)
+    uint16_t SR1 = (instruction >> 6) & 0x0007;
+
+    // Set PC to the value in the source register
+    registers[Registers::R_PC] = registers[SR1];
 }
