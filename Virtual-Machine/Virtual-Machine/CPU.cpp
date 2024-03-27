@@ -184,14 +184,14 @@ void CPU::NOT(uint16_t instruction)
  */
 void CPU::BR(uint16_t instruction)
 {
-    // Extract PCOffset and Condition Flag
-    uint16_t PCOffset = SignExtend(instruction & 0x01FF, 9);
-    uint16_t ConditionFlag = (instruction >> 9) & 0x0007;
+    // Extract pcOffset and Condition Flag
+    uint16_t pcOffset = SignExtend(instruction & 0x01FF, 9);
+    uint16_t conditionFlag = (instruction >> 9) & 0x0007;
 
     // Check if condition flag is set in the Condition Register, then update PC
-    if (ConditionFlag & registers[Registers::R_COND])
+    if (conditionFlag & registers[Registers::R_COND])
     {
-        registers[Registers::R_PC] += PCOffset;
+        registers[Registers::R_PC] += pcOffset;
     }
 }
 
@@ -207,4 +207,86 @@ void CPU::JMP(uint16_t instruction)
 
     // Set PC to the value in the source register
     registers[Registers::R_PC] = registers[SR1];
+}
+
+
+/**
+ * @brief Performs a jump to subroutine operation based on the provided instruction.
+ * @param instruction The 16-bit instruction.
+ */
+void CPU::JSR(uint16_t instruction)
+{
+    // Extract Long Flag to determine the type of jump
+    uint16_t longFlag = (instruction >> 11) & 0x0001;
+
+    // Save the current PC value to R7 (Return Address Register)
+    registers[Registers::R_7] = registers[Registers::R_PC];
+
+    if (longFlag)
+    {
+        // If Long Flag is set, calculate the long PC offset and perform jump
+        uint16_t longPCOffset = SignExtend(instruction & 0x07FF, 11);
+        registers[Registers::R_PC] += longPCOffset;  // JSR
+    }
+    else
+    {
+        // If Long Flag is not set, extract the source register and perform jump
+        uint16_t SR1 = (instruction >> 6) & 0x0007;
+        registers[Registers::R_PC] = registers[SR1]; // JSRR
+    }
+}
+
+
+/**
+ * @brief Performs a load operation based on the provided instruction.
+ * @param instruction The 16-bit instruction.
+ */
+void CPU::LD(uint16_t instruction)
+{
+    // Extract Destination Register (DR) and PC Offset
+    uint16_t DR = (instruction >> 9) & 0x0007; // Destination Register
+    uint16_t pcOffset = SignExtend(instruction & 0x01FF, 9);
+
+    // Load the value from memory at the calculated address into the destination register
+    registers[DR] = MemoryRead(registers[Registers::R_PC] + pcOffset);
+
+    // Update the condition flags based on the value loaded into the destination register
+    UpdateFlags(DR);
+}
+
+
+/**
+ * @brief Performs a load from base register with offset operation based on the provided instruction.
+ * @param instruction The 16-bit instruction.
+ */
+void CPU::LDR(uint16_t instruction)
+{
+    // Extract Destination Register (DR), Base Register (SR1), and Offset
+    uint16_t DR = (instruction >> 9) & 0x0007; // Destination Register
+    uint16_t SR1 = (instruction >> 6) & 0x0007; // Base Register
+    uint16_t offset = SignExtend(instruction & 0x003F, 6); // Offset
+
+    // Load the value from memory at the address calculated by adding base register value and offset
+    registers[DR] = MemoryRead(registers[SR1] + offset);
+
+    // Update the condition flags based on the value loaded into the destination register
+    UpdateFlags(DR);
+}
+
+
+/**
+ * @brief Performs a load effective address operation based on the provided instruction.
+ * @param instruction The 16-bit instruction.
+ */
+void CPU::LEA(uint16_t instruction)
+{
+    // Extract Destination Register (DR) and PC Offset
+    uint16_t DR = (instruction >> 9) & 0x0007; // Destination Register
+    uint16_t pcOffset = SignExtend(instruction & 0x01FF, 9); // PC Offset
+
+    // Calculate the effective address by adding PC value and PC offset
+    registers[DR] = registers[Registers::R_PC] + pcOffset;
+
+    // Update the condition flags based on the effective address value
+    UpdateFlags(DR);
 }
