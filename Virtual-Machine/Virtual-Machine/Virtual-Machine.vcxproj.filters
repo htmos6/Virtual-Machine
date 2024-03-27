@@ -18,5 +18,11 @@
     <ClCompile Include="Virtual-Machine.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="CPU.h">
+      <Filter>Header Files</Filter>
+    </ClCompile>
+    <ClCompile Include="CPU.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>
