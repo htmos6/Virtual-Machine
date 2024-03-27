@@ -81,7 +81,10 @@ class CPU
         void RunVM();
 
 		uint16_t GetProgramCounter() const;
+
         uint16_t MemoryRead(uint16_t memoryAddress) const;
+        void MemoryWrite(uint16_t address, uint16_t value);
+
         uint16_t SignExtend(uint16_t immNumber, int immNumberLength) const;
         void UpdateFlags(uint16_t DR);
         
@@ -89,14 +92,18 @@ class CPU
         void AND(uint16_t instruction);
         void NOT(uint16_t instruction);
 
-        void LDI(uint16_t instruction);
         void BR(uint16_t instruction);
         void JMP(uint16_t instruction);
         void JSR(uint16_t instruction);
+
         void LD(uint16_t instruction);
         void LDR(uint16_t instruction);
         void LEA(uint16_t instruction);
+
         void ST(uint16_t instruction);
         void STI(uint16_t instruction);
         void STR(uint16_t instruction);
+
+        void LDI(uint16_t instruction);
+
 };

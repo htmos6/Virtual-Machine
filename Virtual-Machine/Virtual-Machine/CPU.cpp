@@ -54,6 +54,16 @@ uint16_t CPU::MemoryRead(uint16_t memoryAddress) const
 
 
 /**
+ * @brief Writes the 16-bit value to memory at the specified address.
+ * @param address: The address to write to.
+ * @param value: The 16-bit value to write.
+ */
+void CPU::MemoryWrite(uint16_t address, uint16_t value)
+{
+    memory[address] = value;
+}
+
+/**
  * @brief Sign extends a given immediate number.
  * @param immNumber: The immediate number to sign extend.
  * @param immNumberLength: The length of the immediate number in bits.
@@ -77,7 +87,7 @@ uint16_t CPU::SignExtend(uint16_t immNumber, int immNumberLength) const
 
 /**
  * @brief Updates the condition flags based on the value in the specified register.
- * @param DR The index of the destination register whose value is used to update the flags.
+ * @param DR: The index of the destination register whose value is used to update the flags.
  */
 void CPU::UpdateFlags(uint16_t DR)
 {
@@ -102,7 +112,7 @@ void CPU::UpdateFlags(uint16_t DR)
 
 /**
  * @brief Performs an addition operation based on the provided instruction.
- * @param instruction The 16-bit instruction.
+ * @param instruction: The 16-bit instruction.
  */
 void CPU::ADD(uint16_t instruction)
 {
@@ -132,7 +142,7 @@ void CPU::ADD(uint16_t instruction)
 
 /**
  * @brief Performs a bitwise AND operation based on the provided instruction.
- * @param instruction The 16-bit instruction.
+ * @param instruction: The 16-bit instruction.
  */
 void CPU::AND(uint16_t instruction)
 {
@@ -162,7 +172,7 @@ void CPU::AND(uint16_t instruction)
 
 /**
  * @brief Performs a bitwise NOT operation based on the provided instruction.
- * @param instruction The 16-bit instruction.
+ * @param instruction: The 16-bit instruction.
  */
 void CPU::NOT(uint16_t instruction)
 {
@@ -180,7 +190,7 @@ void CPU::NOT(uint16_t instruction)
 
 /**
  * @brief Performs a branch operation based on the provided instruction.
- * @param instruction The 16-bit instruction.
+ * @param instruction: The 16-bit instruction.
  */
 void CPU::BR(uint16_t instruction)
 {
@@ -212,7 +222,7 @@ void CPU::JMP(uint16_t instruction)
 
 /**
  * @brief Performs a jump to subroutine operation based on the provided instruction.
- * @param instruction The 16-bit instruction.
+ * @param instruction: The 16-bit instruction.
  */
 void CPU::JSR(uint16_t instruction)
 {
@@ -239,7 +249,7 @@ void CPU::JSR(uint16_t instruction)
 
 /**
  * @brief Performs a load operation based on the provided instruction.
- * @param instruction The 16-bit instruction.
+ * @param instruction: The 16-bit instruction.
  */
 void CPU::LD(uint16_t instruction)
 {
@@ -257,7 +267,7 @@ void CPU::LD(uint16_t instruction)
 
 /**
  * @brief Performs a load from base register with offset operation based on the provided instruction.
- * @param instruction The 16-bit instruction.
+ * @param instruction: The 16-bit instruction.
  */
 void CPU::LDR(uint16_t instruction)
 {
@@ -276,7 +286,7 @@ void CPU::LDR(uint16_t instruction)
 
 /**
  * @brief Performs a load effective address operation based on the provided instruction.
- * @param instruction The 16-bit instruction.
+ * @param instruction: The 16-bit instruction.
  */
 void CPU::LEA(uint16_t instruction)
 {
@@ -288,5 +298,71 @@ void CPU::LEA(uint16_t instruction)
     registers[DR] = registers[Registers::R_PC] + pcOffset;
 
     // Update the condition flags based on the effective address value
+    UpdateFlags(DR);
+}
+
+
+/**
+ * @brief Performs a store operation based on the provided instruction.
+ * @param instruction: The 16-bit instruction.
+ */
+void CPU::ST(uint16_t instruction)
+{
+    // Extract Destination Register (DR) and PC Offset
+    uint16_t DR = (instruction >> 9) & 0x0007; // Destination Register
+    uint16_t pcOffset = SignExtend(instruction & 0x01FF, 9); // PC Offset
+
+    // Write the value from DR register to memory at the address calculated by adding PC value and PC offset
+    MemoryWrite(registers[Registers::R_PC] + pcOffset, registers[DR]);
+}
+
+
+/**
+ * @brief Performs an indirect store operation based on the provided instruction.
+ * @param instruction: The 16-bit instruction.
+ */
+void CPU::STI(uint16_t instruction)
+{
+    // Extract Destination Register (DR) and PC Offset
+    uint16_t DR = (instruction >> 9) & 0x0007; // Destination Register
+    uint16_t pcOffset = SignExtend(instruction & 0x01FF, 9); // PC Offset
+
+    // Perform an indirect store by first reading the memory at the address calculated by adding PC value and PC offset,
+    // then storing the value from DR register to the memory location read.
+    MemoryWrite(MemoryRead(registers[Registers::R_PC] + pcOffset), registers[DR]);
+}
+
+
+/**
+ * @brief Performs a store register operation based on the provided instruction.
+ * @param instruction: The 16-bit instruction.
+ */
+void CPU::STR(uint16_t instruction)
+{
+    // Extract Destination Register (DR), Base Register (SR1), and Offset
+    uint16_t DR = (instruction >> 9) & 0x0007; // Destination Register
+    uint16_t SR1 = (instruction >> 6) & 0x0007; // Base Register
+    uint16_t offset = SignExtend(instruction & 0x003F, 6); // Offset
+
+    // Write the value from DR register to memory at the address calculated by adding SR1 register value and offset
+    MemoryWrite(registers[SR1] + offset, registers[DR]);
+}
+
+
+/**
+ * @brief Performs a load indirect operation based on the provided instruction.
+ * @param instruction: The 16-bit instruction.
+ */
+void CPU::LDI(uint16_t instruction)
+{
+    // Extract Destination Register (DR) and PC Offset
+    uint16_t DR = (instruction >> 9) & 0x0007; // Destination Register
+    uint16_t pc_offset = SignExtend(instruction & 0x01FF, 9); // PC Offset
+
+    // Calculate the effective address by adding PC value and PC offset,
+    // then load the value from the memory location pointed by the calculated address into the destination register
+    registers[DR] = MemoryRead(MemoryRead(registers[Registers::R_PC] + pc_offset));
+
+    // Update the condition flags based on the value loaded into the destination register
     UpdateFlags(DR);
 }
