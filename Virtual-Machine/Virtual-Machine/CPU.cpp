@@ -129,3 +129,52 @@ void CPU::ADD(uint16_t instruction)
     UpdateFlags(DR);
     //std::cout << std::dec << registers[R_2] << std::dec;
 }
+
+
+/**
+ * @brief Performs an bitwise AND operation based on the provided instruction.
+ * @param instruction: The 16 bits instruction.
+ */
+void CPU::AND(uint16_t instruction)
+{
+    // Extract Destination Register (DR), Source Register 1 (SR1), and Immediate Flag (Imm)
+    uint16_t DR = (instruction >> 9) & 0x0007; // Destination Register
+    uint16_t SR1 = (instruction >> 6) & 0x0007; // Source Register 1
+    uint16_t Imm = (instruction >> 5) & 0x0001; // Immediate Flag
+
+    if (Imm)
+    {
+        // If Immediate Flag is set, extract immediate value and perform addition
+        uint16_t imm5 = (instruction) & 0x001F;
+        imm5 = SignExtend(imm5, 5);
+        registers[DR] = registers[SR1] & imm5;
+    }
+    else
+    {
+        // If Immediate Flag is not set, extract Source Register 2 (SR2) and perform addition
+        uint16_t SR2 = (instruction) & 0x0007; // Source Register 2
+        registers[DR] = registers[SR1] & registers[SR2];
+    }
+
+    UpdateFlags(DR);
+}
+
+
+/**
+ * @brief Performs an bitwise NOT operation based on the provided instruction.
+ * @param instruction: The 16 bits instruction.
+ */
+void CPU::NOT(uint16_t instruction)
+{
+
+    // Example:
+    // NOT R0, R1; Negate the value in register R1 and store the result in register R0
+    //
+    // Extract Destination Register (DR), Source Register 1 (SR1)
+    uint16_t DR = (instruction >> 9) & 0x0007; // Destination Register
+    uint16_t SR1 = (instruction >> 6) & 0x0007; // Source Register 1
+
+    registers[DR] = ~registers[SR1];
+
+    UpdateFlags(DR);
+}
