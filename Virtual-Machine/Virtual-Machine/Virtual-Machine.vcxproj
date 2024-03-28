@@ -127,9 +127,17 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="ArithmeticLogicUnit.cpp" />
     <ClCompile Include="CPU.cpp" />
     <ClCompile Include="CPU.h" />
+    <ClCompile Include="MemoryIO.cpp" />
+    <ClCompile Include="Trap.cpp" />
     <ClCompile Include="Virtual-Machine.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="ArithmeticLogicUnit.h" />
+    <ClInclude Include="MemoryIO.h" />
+    <ClInclude Include="Trap.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

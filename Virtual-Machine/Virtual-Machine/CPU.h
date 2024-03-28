@@ -1,4 +1,6 @@
-#pragma once
+#ifndef CPU_H
+#define CPU_H
+
 // LC-3 Model Used 
 // Define a macro to represent the maximum memory size, calculated at compile time.
 // The maximum memory size is specified as 128 kilobytes (KB).
@@ -9,9 +11,13 @@
 
 
 #include <cstdint>
+#include <cstdio>
 
+class Trap;
+class ArithmeticLogicUnit;
+class MemoryIO;
 
-enum Opcodes
+enum Opcodes : uint16_t
 {
     OP_BR = 0, // branch
     OP_ADD,    // add 
@@ -32,7 +38,7 @@ enum Opcodes
 };
 
 
-enum ConditionFlags
+enum ConditionFlags : uint16_t
 {
     // The condition flags represent the state of a computation's result.
     // They are stored in the last 3 bits of a 16-bit unsigned integer.
@@ -49,7 +55,7 @@ enum ConditionFlags
 };
 
 
-enum Registers
+enum Registers : uint16_t
 {
 	R_0 = 0,
 	R_1,
@@ -66,7 +72,27 @@ enum Registers
 
 class CPU
 {
-	public:
+    private:
+        // Pointer to the Trap class instance.
+        Trap* trap;
+        // Pointer to the ArithmeticLogicUnit class instance.
+        ArithmeticLogicUnit* arithmeticLogicUnit;
+        // Pointer to the MemoryIO class instance.
+        MemoryIO* memoryIO;
+
+        // Boolean flag to control the execution state of the Virtual Machine.
+        bool running = true;
+
+        // Declaring the class "Trap" as a friend grants it access to private and protected members of the "CPU" class.
+        friend class Trap;
+        // Declaring the class "ArithmeticLogicUnit" as a friend grants it access to private and protected members of the "CPU" class.
+        friend class ArithmeticLogicUnit;
+        // Declaring the class "MemoryIO" as a friend grants it access to private and protected members of the "CPU" class.
+        friend class MemoryIO;
+
+
+    public:
+        // Array to store 16-bit registers.
 		uint16_t registers[REGISTER_COUNT];
 	
 		// Ensure that each element of the 'memory' array stores 16 bits of data.
@@ -79,31 +105,10 @@ class CPU
 		CPU();
 
         void RunVM();
-
-		uint16_t GetProgramCounter() const;
-
-        uint16_t MemoryRead(uint16_t memoryAddress) const;
-        void MemoryWrite(uint16_t address, uint16_t value);
-
+		
+        uint16_t GetProgramCounter() const;
         uint16_t SignExtend(uint16_t immNumber, int immNumberLength) const;
         void UpdateFlags(uint16_t DR);
-        
-        void ADD(uint16_t instruction);
-        void AND(uint16_t instruction);
-        void NOT(uint16_t instruction);
-
-        void BR(uint16_t instruction);
-        void JMP(uint16_t instruction);
-        void JSR(uint16_t instruction);
-
-        void LD(uint16_t instruction);
-        void LDR(uint16_t instruction);
-        void LEA(uint16_t instruction);
-
-        void ST(uint16_t instruction);
-        void STI(uint16_t instruction);
-        void STR(uint16_t instruction);
-
-        void LDI(uint16_t instruction);
-
 };
+
+#endif
