@@ -11,8 +11,7 @@ class MemoryIO : public CPU
 	public:
 		MemoryIO();
 
-		uint16_t Read(uint16_t memoryAddress) const;
+		uint16_t Read(uint16_t memoryAddress);
 		void Write(uint16_t address, uint16_t value);
 };
-
 #endif
