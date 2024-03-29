@@ -1,4 +1,4 @@
-// Virtual-Machine.cpp : This file contains the 'main' function. Program execution begins and ends there.
+// Virtual-Machine.cpp : This file contains the "main" function. Program execution begins and ends there.
 //
 
 #include <iostream>
@@ -13,7 +13,7 @@ int main(int argc, const char* argv[])
     // cpu.memory[0x3000] = 0x15FB; ADD RO, R4, R5
     // cpu.memory[0x3000] = 0x1105; ADD R2, R7, -5
 
-    cpu.RunVM();
+    cpu.RunVM(argc, argv);
 }
 
 
