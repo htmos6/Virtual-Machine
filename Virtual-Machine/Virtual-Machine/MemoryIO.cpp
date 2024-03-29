@@ -13,10 +13,28 @@ MemoryIO::MemoryIO()
  * @param memoryAddress: The address to read from.
  * @return The 16 bits value read from memory.
  */
-uint16_t MemoryIO::Read(uint16_t memoryAddress) const
+uint16_t MemoryIO::Read(uint16_t memoryAddress)
 {
-	return memory[memoryAddress];
+    // Check if the memory address corresponds to the keyboard status register
+    if (memoryAddress == MemoryMappedRegisters::MR_KBSR)
+    {
+        // If a key is pressed, set the keyboard status register's most significant bit (bit 15) to indicate input
+        if (CheckKey())
+        {
+            memory[MemoryMappedRegisters::MR_KBSR] = (1 << 15);
+            // Read the character from the keyboard and store it in the keyboard data register
+            memory[MemoryMappedRegisters::MR_KBDR] = getchar();
+        }
+        else
+        {
+            // If no key is pressed, clear the keyboard status register
+            memory[MemoryMappedRegisters::MR_KBSR] = 0;
+        }
+    }
+    // Return the value stored in memory at the specified address
+    return memory[memoryAddress];
 }
+
 
 
 /**

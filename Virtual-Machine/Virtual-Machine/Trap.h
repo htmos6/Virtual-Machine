@@ -21,9 +21,9 @@ class Trap
         Trap();
         void Proxy(CPU& cpu, uint16_t instruction);
         void GETC(CPU& cpu);
-        void OUT(CPU& cpu);
+        void OUTC(CPU& cpu);
         void PUTS(CPU& cpu);
-        void IN(CPU& cpu);
+        void INC(CPU& cpu);
         void PUTSP(CPU& cpu);
         void HALT(CPU& cpu);
 };

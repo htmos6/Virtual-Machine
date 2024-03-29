@@ -10,12 +10,20 @@
 #define REGISTER_COUNT 10
 
 
-#include <cstdint>
 #include <cstdio>
+#include <cstdint>
+#include <stdio.h>
+#include <stdint.h>
+#include <signal.h>
+// windows only
+#include <Windows.h>
+#include <conio.h>  // _kbhit
+
 
 class Trap;
 class ArithmeticLogicUnit;
 class MemoryIO;
+
 
 enum Opcodes : uint16_t
 {
@@ -70,6 +78,13 @@ enum Registers : uint16_t
 };
 
 
+enum MemoryMappedRegisters : uint16_t
+{
+    MR_KBSR = 0xFE00, // keyboard status
+    MR_KBDR = 0xFE02  // keyboard data
+};
+
+
 class CPU
 {
     private:
@@ -80,6 +95,11 @@ class CPU
         // Pointer to the MemoryIO class instance.
         MemoryIO* memoryIO;
 
+        // Handle to the standard input device.
+        HANDLE hStdin = INVALID_HANDLE_VALUE;
+        // Variables to store the input mode flags.
+        DWORD fdwMode, fdwOldMode;
+
         // Boolean flag to control the execution state of the Virtual Machine.
         bool running = true;
 
@@ -89,14 +109,14 @@ class CPU
         friend class ArithmeticLogicUnit;
         // Declaring the class "MemoryIO" as a friend grants it access to private and protected members of the "CPU" class.
         friend class MemoryIO;
-
+        
 
     public:
         // Array to store 16-bit registers.
 		uint16_t registers[REGISTER_COUNT];
 	
-		// Ensure that each element of the 'memory' array stores 16 bits of data.
-		// If 'uint16_t' is not explicitly specified (and 'int' is used instead), 
+		// Ensure that each element of the "memory" array stores 16 bits of data.
+		// If "uint16_t" is not explicitly specified (and "int" is used instead), 
 		// the size of each element might vary depending on the compiler and system,
 		// potentially being interpreted as either 16 or 32 bits.
 		uint16_t memory[MEMORY_MAX];
@@ -104,11 +124,17 @@ class CPU
 	public:
 		CPU();
 
-        void RunVM();
+        void RunVM(int argc, const char* argv[]);
 		
         uint16_t GetProgramCounter() const;
         uint16_t SignExtend(uint16_t immNumber, int immNumberLength) const;
         void UpdateFlags(uint16_t DR);
+        void DisableInputBuffering();
+        void RestoreInputBuffering();
+        uint16_t CheckKey();
+        static void HandleInterrupt(int signal);
+        uint16_t Swap16(uint16_t number);
+        void ReadImageFile(FILE* file);
+        int ReadImage(const char* imagePath);
 };
-
 #endif
