@@ -5,6 +5,7 @@
 #include "Trap.h"
 #include "MemoryIO.h"
 #include "ArithmeticLogicUnit.h"
+#include "OS.h"
 #include "CPU.h"
 
 
@@ -17,8 +18,20 @@ CPU::CPU()
 	// PC_START = 0x3000 is the default
 	registers[Registers::R_PC] = 0x3000;
 }
-void CPU::RunVM(int argc, const char* argv[])
+
+
+CPU::~CPU()
 {
+}
+
+
+void CPU::RunVM(int argc, char* argv[])
+{
+    Trap* trap = new Trap();
+    OS* os = new OS();
+    MemoryIO* memoryIO = new MemoryIO(os);
+    ArithmeticLogicUnit* arithmeticLogicUnit = new ArithmeticLogicUnit(memoryIO);
+
     // Check if at least one image file is provided as a command-line argument
     if (argc < 2)
     {
@@ -27,11 +40,15 @@ void CPU::RunVM(int argc, const char* argv[])
         exit(2);
     }
 
+    // Update argv[1] to point to the new path
+    const char* new_path = "C:\\Users\\Legion\\Downloads\\2048.obj";
+    //strcpy(argv[1], new_path);
+
     // Iterate over command-line arguments (excluding the program name)
-    for (int j = 1; j < argc; ++j)
+    for (int j = 1; j < 2; ++j)
     {
         // Attempt to read the image file specified by the current command-line argument
-        if (!ReadImage(argv[j]))
+        if (!ReadImage(new_path))
         {
             // Print error message if image file cannot be loaded and exit with error code 1
             printf("failed to load image: %s\n", argv[j]);
@@ -40,10 +57,10 @@ void CPU::RunVM(int argc, const char* argv[])
     }
 
     // Set up a signal handler for interrupt signal (Ctrl+C)
-    signal(SIGINT, HandleInterrupt);
+    signal(SIGINT, os->HandleInterruptWrapper);
 
     // Disable input buffering to allow direct console input
-    DisableInputBuffering();
+    os->DisableInputBuffering();
 
     while (this->running)
 	{
@@ -103,9 +120,14 @@ void CPU::RunVM(int argc, const char* argv[])
                 abort();
                 break;
 		}
+    }
 
-        RestoreInputBuffering();
-	}
+    os->RestoreInputBuffering();
+
+    delete trap;
+    delete os;
+    delete memoryIO;
+    delete arithmeticLogicUnit;
 }
 
 
@@ -167,76 +189,6 @@ void CPU::UpdateFlags(uint16_t DR)
 
 
 /**
- * @brief Disables input buffering for console input.
- * This function modifies the console input mode to disable input echo and to return
- * when one or more characters are available.
- * Input buffering refers to the process of collecting input characters before
- * they are sent to the application, allowing for the processing of multiple characters
- * at once. Disabling buffering allows for immediate response to user input.
- */
-void CPU::DisableInputBuffering()
-{
-    // Get the handle for standard input
-    hStdin = GetStdHandle(STD_INPUT_HANDLE);
-
-    // Save the current console input mode
-    GetConsoleMode(hStdin, &fdwOldMode);
-
-    // Calculate the new console input mode by toggling flags
-    // Disabling ENABLE_ECHO_INPUT prevents characters from being echoed (reflecting) back to the screen
-    // Disabling ENABLE_LINE_INPUT allows input functions to return immediately when
-    // characters are available for reading, rather than waiting for the Enter key.
-    //
-    // Example: In a game where ENABLE_LINE_INPUT is used, pressing 'A' by the player
-    // triggers an immediate action such as moving the character to the left.
-    fdwMode = fdwOldMode
-        ^ ENABLE_ECHO_INPUT  // Disable input echo
-        ^ ENABLE_LINE_INPUT; // Enable immediate return when characters are available
-
-    // Apply the new console input mode
-    SetConsoleMode(hStdin, fdwMode);
-
-    // Clear the input buffer to discard any pending input
-    // This ensures that any characters typed before changing the mode
-    // are not processed by the application
-    FlushConsoleInputBuffer(hStdin);
-}
-
-
-/**
- * @brief Restores the previous input buffering settings.
- * This function sets the console input mode back to the old mode.
- */
-void CPU::RestoreInputBuffering()
-{
-    SetConsoleMode(hStdin, fdwOldMode);
-}
-
-
-/**
- * @brief Checks if a key is pressed within a specified timeout.
- * @return True if a key is pressed within the timeout, false otherwise.
- */
-uint16_t CPU::CheckKey()
-{
-    return WaitForSingleObject(hStdin, 1000) == WAIT_OBJECT_0 && _kbhit();
-}
-
-
-/**
- * @brief Handles an interrupt signal.
- * This function restores the input buffering settings, prints a newline character,
- * and exits the program with a specific exit code (-2).
- */
-static void CPU::HandleInterrupt(int signal)
-{
-    RestoreInputBuffering(); // Restore input buffering settings
-    printf("\n"); // Print newline character
-    exit(-2); // Exit program with exit code -2
-}
-
-
-/**
  * @brief Swaps the byte order of a 16-bit value.
  * This function reverses the byte order of the input 16-bit value.
  * @param number: The 16-bit value to be swapped.
@@ -271,7 +223,7 @@ void CPU::ReadImageFile(FILE* file)
     uint16_t maxRead = MEMORY_MAX - origin;
 
     // Pointer to the memory location to start reading from
-    uint16_t* p = memory + origin; 
+    uint16_t* p = memory + origin;
 
     // Read the contents of the file into memory
     size_t read = fread(p, sizeof(uint16_t), maxRead, file);

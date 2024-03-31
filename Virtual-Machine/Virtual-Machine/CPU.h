@@ -23,7 +23,7 @@
 class Trap;
 class ArithmeticLogicUnit;
 class MemoryIO;
-
+class OS;
 
 enum Opcodes : uint16_t
 {
@@ -87,14 +87,7 @@ enum MemoryMappedRegisters : uint16_t
 
 class CPU
 {
-    private:
-        // Pointer to the Trap class instance.
-        Trap* trap;
-        // Pointer to the ArithmeticLogicUnit class instance.
-        ArithmeticLogicUnit* arithmeticLogicUnit;
-        // Pointer to the MemoryIO class instance.
-        MemoryIO* memoryIO;
-
+    protected:
         // Handle to the standard input device.
         HANDLE hStdin = INVALID_HANDLE_VALUE;
         // Variables to store the input mode flags.
@@ -109,31 +102,32 @@ class CPU
         friend class ArithmeticLogicUnit;
         // Declaring the class "MemoryIO" as a friend grants it access to private and protected members of the "CPU" class.
         friend class MemoryIO;
+        // Declaring the class "OS" as a friend grants it access to private and protected members of the "CPU" class.
+        friend class OS;
         
 
     public:
         // Array to store 16-bit registers.
 		uint16_t registers[REGISTER_COUNT];
-	
-		// Ensure that each element of the "memory" array stores 16 bits of data.
-		// If "uint16_t" is not explicitly specified (and "int" is used instead), 
-		// the size of each element might vary depending on the compiler and system,
-		// potentially being interpreted as either 16 or 32 bits.
-		uint16_t memory[MEMORY_MAX];
+
+        // Ensure that each element of the "memory" array stores 16 bits of data.
+        // If "uint16_t" is not explicitly specified (and "int" is used instead), 
+        // the size of each element might vary depending on the compiler and system,
+        // potentially being interpreted as either 16 or 32 bits.
+        uint16_t memory[MEMORY_MAX];
+
 
 	public:
 		CPU();
+        ~CPU();
 
-        void RunVM(int argc, const char* argv[]);
+        void RunVM(int argc, char* argv[]);
 		
         uint16_t GetProgramCounter() const;
         uint16_t SignExtend(uint16_t immNumber, int immNumberLength) const;
         void UpdateFlags(uint16_t DR);
-        void DisableInputBuffering();
-        void RestoreInputBuffering();
-        uint16_t CheckKey();
-        static void HandleInterrupt(int signal);
         uint16_t Swap16(uint16_t number);
+
         void ReadImageFile(FILE* file);
         int ReadImage(const char* imagePath);
 };
