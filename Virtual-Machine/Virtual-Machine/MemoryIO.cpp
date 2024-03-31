@@ -1,10 +1,11 @@
 #include "MemoryIO.h"
+#include "OS.h"
 #include "CPU.h"
 
 
-MemoryIO::MemoryIO()
+MemoryIO::MemoryIO(OS* os)
 {
-	;
+    this->os = os;
 }
 
 
@@ -19,7 +20,7 @@ uint16_t MemoryIO::Read(uint16_t memoryAddress)
     if (memoryAddress == MemoryMappedRegisters::MR_KBSR)
     {
         // If a key is pressed, set the keyboard status register's most significant bit (bit 15) to indicate input
-        if (CheckKey())
+        if (os->CheckKey())
         {
             memory[MemoryMappedRegisters::MR_KBSR] = (1 << 15);
             // Read the character from the keyboard and store it in the keyboard data register

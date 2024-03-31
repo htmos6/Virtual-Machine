@@ -8,8 +8,12 @@
 
 class ArithmeticLogicUnit : public CPU
 {
+    private:
+        MemoryIO* memoryIO;
+
+
 	public:
-        ArithmeticLogicUnit();
+        ArithmeticLogicUnit(MemoryIO* memoryIO);
         
         void ADD(uint16_t instruction);
         void AND(uint16_t instruction);

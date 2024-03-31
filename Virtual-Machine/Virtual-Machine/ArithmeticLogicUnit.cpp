@@ -2,9 +2,9 @@
 #include "MemoryIO.h"
 
 
-ArithmeticLogicUnit::ArithmeticLogicUnit() 
+ArithmeticLogicUnit::ArithmeticLogicUnit(MemoryIO* memoryIO)
 {
-    ;
+    this->memoryIO = memoryIO;
 }
 
 
