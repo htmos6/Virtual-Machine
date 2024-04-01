@@ -25,6 +25,7 @@ class ArithmeticLogicUnit;
 class MemoryIO;
 class OS;
 
+
 enum Opcodes : uint16_t
 {
     OP_BR = 0, // branch
@@ -87,25 +88,6 @@ enum MemoryMappedRegisters : uint16_t
 
 class CPU
 {
-    protected:
-        // Handle to the standard input device.
-        HANDLE hStdin = INVALID_HANDLE_VALUE;
-        // Variables to store the input mode flags.
-        DWORD fdwMode, fdwOldMode;
-
-        // Boolean flag to control the execution state of the Virtual Machine.
-        bool running = true;
-
-        // Declaring the class "Trap" as a friend grants it access to private and protected members of the "CPU" class.
-        friend class Trap;
-        // Declaring the class "ArithmeticLogicUnit" as a friend grants it access to private and protected members of the "CPU" class.
-        friend class ArithmeticLogicUnit;
-        // Declaring the class "MemoryIO" as a friend grants it access to private and protected members of the "CPU" class.
-        friend class MemoryIO;
-        // Declaring the class "OS" as a friend grants it access to private and protected members of the "CPU" class.
-        friend class OS;
-        
-
     public:
         // Array to store 16-bit registers.
 		uint16_t registers[REGISTER_COUNT];
@@ -116,19 +98,16 @@ class CPU
         // potentially being interpreted as either 16 or 32 bits.
         uint16_t memory[MEMORY_MAX];
 
+        // Boolean flag to control the execution state of the Virtual Machine.
+        int running = 1;
 
 	public:
 		CPU();
         ~CPU();
-
-        void RunVM(int argc, char* argv[]);
 		
-        uint16_t GetProgramCounter() const;
-        uint16_t SignExtend(uint16_t immNumber, int immNumberLength) const;
         void UpdateFlags(uint16_t DR);
-        uint16_t Swap16(uint16_t number);
 
-        void ReadImageFile(FILE* file);
-        int ReadImage(const char* imagePath);
+        void ReadImageFile(FILE* file, ArithmeticLogicUnit* alu);
+        int ReadImage(const char* imagePath, ArithmeticLogicUnit* alu);
 };
 #endif
