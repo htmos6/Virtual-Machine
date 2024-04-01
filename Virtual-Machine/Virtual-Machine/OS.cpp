@@ -1,6 +1,5 @@
 #include "OS.h"
 
-#include <cstdio>
 #include <cstdint>
 #include <stdio.h>
 #include <stdint.h>
@@ -12,8 +11,9 @@
 
 OS::OS()
 {
-    ;
+
 }
+
 
 /**
  * @brief Disables input buffering for console input.
@@ -58,7 +58,7 @@ void OS::DisableInputBuffering()
  */
 void OS::RestoreInputBuffering()
 {
-    SetConsoleMode(hStdin, fdwOldMode);
+    SetConsoleMode(this->hStdin, fdwOldMode);
 }
 
 
@@ -88,6 +88,6 @@ void OS::HandleInterrupt(int signal)
 // Static function to act as a wrapper
 void OS::HandleInterruptWrapper(int signal)
 {
-    OS osInstance;
-    osInstance.HandleInterrupt(signal);
+    OS osWrapper;
+    osWrapper.HandleInterrupt(signal);
 }

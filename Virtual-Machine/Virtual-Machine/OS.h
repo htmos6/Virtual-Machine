@@ -2,17 +2,24 @@
 #define OS_H
 
 
-#include "CPU.h"
+#include <Windows.h>
+#include <cstdint>
 
 
-class OS : public CPU
+class OS
 {
-	public: 
-        OS();
-        void DisableInputBuffering();
-        void RestoreInputBuffering();
-        uint16_t CheckKey();
-        void HandleInterrupt(int signal);
-        static void HandleInterruptWrapper(int signal);
+private:
+    // Handle to the standard input device.
+    HANDLE hStdin = INVALID_HANDLE_VALUE;
+    // Variables to store the input mode flags.
+    DWORD fdwMode, fdwOldMode;
+
+public:
+    OS();
+    void DisableInputBuffering();
+    void RestoreInputBuffering();
+    uint16_t CheckKey();
+    void HandleInterrupt(int signal);
+    static void HandleInterruptWrapper(int signal);
 };
 #endif
