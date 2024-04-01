@@ -130,16 +130,18 @@
     <ClCompile Include="ArithmeticLogicUnit.cpp" />
     <ClCompile Include="CPU.cpp" />
     <ClCompile Include="CPU.h" />
+    <ClCompile Include="main.cpp" />
     <ClCompile Include="MemoryIO.cpp" />
     <ClCompile Include="OS.cpp" />
     <ClCompile Include="Trap.cpp" />
-    <ClCompile Include="Virtual-Machine.cpp" />
+    <ClCompile Include="VirtualMachine.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ArithmeticLogicUnit.h" />
     <ClInclude Include="MemoryIO.h" />
     <ClInclude Include="OS.h" />
     <ClInclude Include="Trap.h" />
+    <ClInclude Include="VirtualMachine.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
