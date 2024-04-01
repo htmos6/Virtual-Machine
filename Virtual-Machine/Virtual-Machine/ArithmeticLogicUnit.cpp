@@ -1,10 +1,48 @@
 #include "ArithmeticLogicUnit.h"
+#include "CPU.h"
 #include "MemoryIO.h"
 
 
-ArithmeticLogicUnit::ArithmeticLogicUnit(MemoryIO* memoryIO)
+ArithmeticLogicUnit::ArithmeticLogicUnit(uint16_t* memory, uint16_t* registers, MemoryIO* memoryIO, CPU* cpu)
 {
-    this->memoryIO = memoryIO;
+    memoryPtr = memory;
+    registersPtr = registers;
+    memoryIOPtr = memoryIO;
+    cpuPtr = cpu;
+}
+
+
+/**
+ * @brief Sign extends a given immediate number.
+ * @param immNumber: The immediate number to sign extend.
+ * @param immNumberLength: The length of the immediate number in bits.
+ * @return The sign extended immediate number.
+ */
+uint16_t ArithmeticLogicUnit::SignExtend(uint16_t immNumber, int immNumberLength) const
+{
+    // Determine the sign bit of the immediate number
+    int signBit = (immNumber >> (immNumberLength - 1)) & 0x0001;
+
+    // If the sign bit is set, perform sign extension
+    if (signBit)
+    {
+        return immNumber | (0xFFFF << immNumberLength);
+    }
+
+    // If sign bit is zero (0), return the original number
+    return immNumber;
+}
+
+
+/**
+ * @brief Swaps the byte order of a 16-bit value.
+ * This function reverses the byte order of the input 16-bit value.
+ * @param number: The 16-bit value to be swapped.
+ * @return The 16-bit value with its byte order swapped.
+ */
+uint16_t ArithmeticLogicUnit::Swap16(uint16_t number)
+{
+    return (number << 8) | (number >> 8);
 }
 
 
@@ -24,17 +62,17 @@ void ArithmeticLogicUnit::ADD(uint16_t instruction)
         // If Immediate Flag is set, extract immediate value and perform addition
         uint16_t imm5 = (instruction) & 0x001F;
         imm5 = SignExtend(imm5, 5);
-        registers[DR] = registers[SR1] + imm5;
+        registersPtr[DR] = registersPtr[SR1] + imm5;
     }
     else
     {
         // If Immediate Flag is not set, extract Source Register 2 (SR2) and perform addition
         uint16_t SR2 = (instruction) & 0x0007; // Source Register 2
-        registers[DR] = registers[SR1] + registers[SR2];
+        registersPtr[DR] = registersPtr[SR1] + registersPtr[SR2];
     }
 
     // Update condition flags based on the result in the destination register
-    UpdateFlags(DR);
+    cpuPtr->UpdateFlags(DR);
 }
 
 
@@ -54,17 +92,17 @@ void ArithmeticLogicUnit::AND(uint16_t instruction)
         // If Immediate Flag is set, extract immediate value and perform bitwise AND
         uint16_t imm5 = (instruction) & 0x001F;
         imm5 = SignExtend(imm5, 5);
-        registers[DR] = registers[SR1] & imm5;
+        registersPtr[DR] = registersPtr[SR1] & imm5;
     }
     else
     {
         // If Immediate Flag is not set, extract Source Register 2 (SR2) and perform bitwise AND
         uint16_t SR2 = (instruction) & 0x0007; // Source Register 2
-        registers[DR] = registers[SR1] & registers[SR2];
+        registersPtr[DR] = registersPtr[SR1] & registersPtr[SR2];
     }
 
     // Update condition flags based on the result in the destination register
-    UpdateFlags(DR);
+    cpuPtr->UpdateFlags(DR);
 }
 
 
@@ -79,10 +117,10 @@ void ArithmeticLogicUnit::NOT(uint16_t instruction)
     uint16_t SR1 = (instruction >> 6) & 0x0007; // Source Register 1
 
     // Perform bitwise NOT operation on the value in source register and store it in destination register
-    registers[DR] = ~registers[SR1];
+    registersPtr[DR] = ~registersPtr[SR1];
 
     // Update condition flags based on the result in the destination register
-    UpdateFlags(DR);
+    cpuPtr->UpdateFlags(DR);
 }
 
 
@@ -97,9 +135,9 @@ void ArithmeticLogicUnit::BR(uint16_t instruction)
     uint16_t conditionFlag = (instruction >> 9) & 0x0007;
 
     // Check if condition flag is set in the Condition Register, then update PC
-    if (conditionFlag & registers[Registers::R_COND])
+    if (conditionFlag & registersPtr[Registers::R_COND])
     {
-        registers[Registers::R_PC] += pcOffset;
+        registersPtr[Registers::R_PC] += pcOffset;
     }
 }
 
@@ -114,7 +152,7 @@ void ArithmeticLogicUnit::JMP(uint16_t instruction)
     uint16_t SR1 = (instruction >> 6) & 0x0007;
 
     // Set PC to the value in the source register
-    registers[Registers::R_PC] = registers[SR1];
+    registersPtr[Registers::R_PC] = registersPtr[SR1];
 }
 
 
@@ -128,19 +166,19 @@ void ArithmeticLogicUnit::JSR(uint16_t instruction)
     uint16_t longFlag = (instruction >> 11) & 0x0001;
 
     // Save the current PC value to R7 (Return Address Register)
-    registers[Registers::R_7] = registers[Registers::R_PC];
+    registersPtr[Registers::R_7] = registersPtr[Registers::R_PC];
 
     if (longFlag)
     {
         // If Long Flag is set, calculate the long PC offset and perform jump
         uint16_t longPCOffset = SignExtend(instruction & 0x07FF, 11);
-        registers[Registers::R_PC] += longPCOffset;  // JSR
+        registersPtr[Registers::R_PC] += longPCOffset;  // JSR
     }
     else
     {
         // If Long Flag is not set, extract the source register and perform jump
         uint16_t SR1 = (instruction >> 6) & 0x0007;
-        registers[Registers::R_PC] = registers[SR1]; // JSRR
+        registersPtr[Registers::R_PC] = registersPtr[SR1]; // JSRR
     }
 }
 
@@ -156,10 +194,10 @@ void ArithmeticLogicUnit::LD(uint16_t instruction)
     uint16_t pcOffset = SignExtend(instruction & 0x01FF, 9);
 
     // Load the value from memory at the calculated address into the destination register
-    registers[DR] = memoryIO->Read(registers[Registers::R_PC] + pcOffset);
+    registersPtr[DR] = memoryIOPtr->Read(registersPtr[Registers::R_PC] + pcOffset);
 
     // Update the condition flags based on the value loaded into the destination register
-    UpdateFlags(DR);
+    cpuPtr->UpdateFlags(DR);
 }
 
 
@@ -175,10 +213,10 @@ void ArithmeticLogicUnit::LDR(uint16_t instruction)
     uint16_t offset = SignExtend(instruction & 0x003F, 6); // Offset
 
     // Load the value from memory at the address calculated by adding base register value and offset
-    registers[DR] = memoryIO->Read(registers[SR1] + offset);
+    registersPtr[DR] = memoryIOPtr->Read(registersPtr[SR1] + offset);
 
     // Update the condition flags based on the value loaded into the destination register
-    UpdateFlags(DR);
+    cpuPtr->UpdateFlags(DR);
 }
 
 
@@ -193,10 +231,10 @@ void ArithmeticLogicUnit::LEA(uint16_t instruction)
     uint16_t pcOffset = SignExtend(instruction & 0x01FF, 9); // PC Offset
 
     // Calculate the effective address by adding PC value and PC offset
-    registers[DR] = registers[Registers::R_PC] + pcOffset;
+    registersPtr[DR] = registersPtr[Registers::R_PC] + pcOffset;
 
     // Update the condition flags based on the effective address value
-    UpdateFlags(DR);
+    cpuPtr->UpdateFlags(DR);
 }
 
 
@@ -211,7 +249,7 @@ void ArithmeticLogicUnit::ST(uint16_t instruction)
     uint16_t pcOffset = SignExtend(instruction & 0x01FF, 9); // PC Offset
 
     // Write the value from DR register to memory at the address calculated by adding PC value and PC offset
-    memoryIO->Write(registers[Registers::R_PC] + pcOffset, registers[DR]);
+    memoryIOPtr->Write(registersPtr[Registers::R_PC] + pcOffset, registersPtr[DR]);
 }
 
 
@@ -227,7 +265,7 @@ void ArithmeticLogicUnit::STI(uint16_t instruction)
 
     // Perform an indirect store by first reading the memory at the address calculated by adding PC value and PC offset,
     // then storing the value from DR register to the memory location read.
-    memoryIO->Write(memoryIO->Read(registers[Registers::R_PC] + pcOffset), registers[DR]);
+    memoryIOPtr->Write(memoryIOPtr->Read(registersPtr[Registers::R_PC] + pcOffset), registersPtr[DR]);
 }
 
 
@@ -243,7 +281,7 @@ void ArithmeticLogicUnit::STR(uint16_t instruction)
     uint16_t offset = SignExtend(instruction & 0x003F, 6); // Offset
 
     // Write the value from DR register to memory at the address calculated by adding SR1 register value and offset
-    memoryIO->Write(registers[SR1] + offset, registers[DR]);
+    memoryIOPtr->Write(registersPtr[SR1] + offset, registersPtr[DR]);
 }
 
 
@@ -259,8 +297,8 @@ void ArithmeticLogicUnit::LDI(uint16_t instruction)
 
     // Calculate the effective address by adding PC value and PC offset,
     // then load the value from the memory location pointed by the calculated address into the destination register
-    registers[DR] = memoryIO->Read(memoryIO->Read(registers[Registers::R_PC] + pc_offset));
+    registersPtr[DR] = memoryIOPtr->Read(memoryIOPtr->Read(registersPtr[Registers::R_PC] + pc_offset));
 
     // Update the condition flags based on the value loaded into the destination register
-    UpdateFlags(DR);
+    cpuPtr->UpdateFlags(DR);
 }
