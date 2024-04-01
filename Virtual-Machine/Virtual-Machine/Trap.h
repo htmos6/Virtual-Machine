@@ -1,7 +1,11 @@
 #ifndef TRAP_H
 #define TRAP_H
 
-#include "CPU.h"
+
+#include <cstdint>
+
+
+class CPU;
 
 
 enum TrapCodes : uint16_t
@@ -17,14 +21,21 @@ enum TrapCodes : uint16_t
 
 class Trap
 {
-    public:
-        Trap();
-        void Proxy(CPU& cpu, uint16_t instruction);
-        void GETC(CPU& cpu);
-        void OUTC(CPU& cpu);
-        void PUTS(CPU& cpu);
-        void INC(CPU& cpu);
-        void PUTSP(CPU& cpu);
-        void HALT(CPU& cpu);
+private:
+    uint16_t* memoryPtr;
+    uint16_t* registersPtr;
+    CPU* cpuPtr;
+
+public:
+    Trap(uint16_t* memory, uint16_t* registers, CPU* cpu);
+
+    void Proxy(uint16_t instruction);
+
+    void GETC();
+    void OUTC();
+    void PUTS();
+    void INC();
+    void PUTSP();
+    void HALT();
 };
 #endif

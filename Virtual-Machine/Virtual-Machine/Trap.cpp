@@ -2,9 +2,11 @@
 #include "CPU.h"
 
 
-Trap::Trap()
+Trap::Trap(uint16_t* memory, uint16_t* registers, CPU* cpu)
 {
-    ;
+    memoryPtr = memory;
+    registersPtr = registers;
+    cpuPtr = cpu;
 }
 
 
@@ -15,31 +17,31 @@ Trap::Trap()
  * @param cpu: Reference to the CPU object used to control the virtual machine's operation.
  * @param instruction: The 16 bits of instruction to execute.
  */
-void Trap::Proxy(CPU& cpu, uint16_t instruction)
+void Trap::Proxy(uint16_t instruction)
 {
     // Save the return address
-    cpu.registers[Registers::R_7] = cpu.registers[Registers::R_PC];
+    registersPtr[Registers::R_7] = registersPtr[Registers::R_PC];
 
     // Switch based on the trap vector
     switch (instruction & 0x00FF)
     {
     case TRAP_GETC:
-        GETC(cpu); // Handle GETC trap
+        GETC(); // Handle GETC trap
         break;
     case TRAP_OUT:
-        OUTC(cpu); // Handle OUTC trap
+        OUTC(); // Handle OUTC trap
         break;
     case TRAP_PUTS:
-        PUTS(cpu); // Handle PUTS trap
+        PUTS(); // Handle PUTS trap
         break;
     case TRAP_IN:
-        INC(cpu); // Handle INC trap
+        INC(); // Handle INC trap
         break;
     case TRAP_PUTSP:
-        PUTSP(cpu); // Handle PUTSP trap
+        PUTSP(); // Handle PUTSP trap
         break;
     case TRAP_HALT:
-        HALT(cpu); // Handle HALT trap
+        HALT(); // Handle HALT trap
         break;
     }
 }
@@ -50,12 +52,12 @@ void Trap::Proxy(CPU& cpu, uint16_t instruction)
  * and stores the ASCII value of the character in register R0.
  * @param cpu: Reference to the CPU object used to control the virtual machine's operation.
  */
-void Trap::GETC(CPU& cpu)
+void Trap::GETC()
 {
     // Read character from console
-    cpu.registers[Registers::R_0] = (uint16_t)getchar();
+    registersPtr[Registers::R_0] = (uint16_t)getchar();
     // Update condition flags based on the result
-    cpu.UpdateFlags(Registers::R_0);
+    cpuPtr->UpdateFlags(Registers::R_0);
 }
 
 /**
@@ -63,10 +65,10 @@ void Trap::GETC(CPU& cpu)
  * This function outputs the character stored in register R0 to the console.
  * @param cpu Reference to the CPU object used to control the virtual machine's operation.
  */
-void Trap::OUTC(CPU& cpu)
+void Trap::OUTC()
 {
     // Output character to console
-    putc((char)cpu.registers[Registers::R_0], stdout);
+    putc((char)registersPtr[Registers::R_0], stdout);
     // Flush output buffer to ensure immediate display
     fflush(stdout);
 }
@@ -77,19 +79,19 @@ void Trap::OUTC(CPU& cpu)
  * starting at the address specified in register R0 to the console.
  * @param cpu Reference to the CPU object used to control the virtual machine's operation.
  */
-void Trap::PUTS(CPU& cpu)
+void Trap::PUTS()
 {
     // Iterate through memory and output characters until null terminator is encountered
-    uint16_t* c = cpu.memory + cpu.registers[Registers::R_0];
+    uint16_t* c = memoryPtr + registersPtr[Registers::R_0];
     while (*c)
     {
         // Output character to console
-        putc((char)*c, stdout); 
+        putc((char)*c, stdout);
         // Move to the next character in memory
-        ++c; 
+        ++c;
     }
     // Flush output buffer to ensure immediate display
-    fflush(stdout); 
+    fflush(stdout);
 }
 
 /**
@@ -98,7 +100,7 @@ void Trap::PUTS(CPU& cpu)
  * and stores the ASCII value of the character in register R0.
  * @param cpu Reference to the CPU object used to control the virtual machine's operation.
  */
-void Trap::INC(CPU& cpu)
+void Trap::INC()
 {
     printf("Enter a character: ");
 
@@ -109,9 +111,9 @@ void Trap::INC(CPU& cpu)
     // Flush output buffer to ensure immediate display
     fflush(stdout);
     // Store ASCII value of character in register R0
-    cpu.registers[Registers::R_0] = (uint16_t)c;
+    registersPtr[Registers::R_0] = (uint16_t)c;
     // Update condition flags based on the result
-    cpu.UpdateFlags(Registers::R_0);
+    cpuPtr->UpdateFlags(Registers::R_0);
 }
 
 /**
@@ -120,10 +122,10 @@ void Trap::INC(CPU& cpu)
  * starting at the address specified in register R0 to the console.
  * @param cpu Reference to the CPU object used to control the virtual machine's operation.
  */
-void Trap::PUTSP(CPU& cpu)
+void Trap::PUTSP()
 {
     // Iterate through memory and output characters until null terminator is encountered
-    uint16_t* c = cpu.memory + cpu.registers[Registers::R_0];
+    uint16_t* c = memoryPtr + registersPtr[Registers::R_0];
     while (*c)
     {
         // Extract lower 8 bits of the word
@@ -148,11 +150,11 @@ void Trap::PUTSP(CPU& cpu)
  * indicating that the virtual machine should stop execution.
  * @param cpu Reference to the CPU object used to control the virtual machine's operation.
  */
-void Trap::HALT(CPU& cpu)
+void Trap::HALT()
 {
     puts("HALT");
     // Flush output buffer to ensure immediate display
-    fflush(stdout); 
+    fflush(stdout);
     // Set 'running' flag to false to halt execution
-    cpu.running = false;
+    cpuPtr->running = 0;
 }
