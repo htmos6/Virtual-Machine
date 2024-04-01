@@ -3,19 +3,21 @@
 
 
 #include <cstdint>
-#include "CPU.h"
 
 
-class MemoryIO : public CPU
-{	
-	private: 
-		OS* os;
-	
+class OS;
 
-	public:
-		MemoryIO(OS* os);
 
-		uint16_t Read(uint16_t memoryAddress);
-		void Write(uint16_t address, uint16_t value);
+class MemoryIO
+{
+private:
+	uint16_t* memoryPtr;
+	OS* osPtr;
+
+public:
+	MemoryIO(uint16_t* memory, OS* os);
+
+	uint16_t Read(uint16_t memoryAddress);
+	void Write(uint16_t address, uint16_t value);
 };
 #endif
