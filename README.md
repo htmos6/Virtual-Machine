@@ -18,7 +18,7 @@ By setting the command-line arguments in the project properties, Visual Studio w
 
 ## Control Game with WASD Keys
 
-### GAME 2048
+### GAME : 2048
 ![image](https://github.com/htmos6/Virtual-Machine/assets/88316097/60630e93-6991-457e-9f22-6d5452efc14b)
 
 ![image](https://github.com/htmos6/Virtual-Machine/assets/88316097/52e76c34-83ae-4d6f-8b78-9f8cb50fd257)
@@ -26,7 +26,7 @@ By setting the command-line arguments in the project properties, Visual Studio w
 ![image](https://github.com/htmos6/Virtual-Machine/assets/88316097/a7b05ebb-51c1-4085-8832-9b990257857c)
 
 
-### Rogue 2048
+### GAME : Rogue
 ![image](https://github.com/htmos6/Virtual-Machine/assets/88316097/b1217d92-613f-43fa-914c-04be485aa4cb)
 
 ![image](https://github.com/htmos6/Virtual-Machine/assets/88316097/87e460df-94aa-4c96-81a7-63d5d8bfeaba)
