@@ -3,20 +3,41 @@
 #include "MemoryIO.h"
 
 
+/**
+ * @brief Constructs an instance of ArithmeticLogicUnit.
+ *
+ * Initializes pointers to memory, registers, MemoryIO, and CPU objects.
+ *
+ * @param memory Pointer to the memory array.
+ * @param registers Pointer to the registers array.
+ * @param memoryIO Pointer to the MemoryIO object.
+ * @param cpu Pointer to the CPU object.
+ */
 ArithmeticLogicUnit::ArithmeticLogicUnit(uint16_t* memory, uint16_t* registers, MemoryIO* memoryIO, CPU* cpu)
 {
+    // Initialize memory pointer
     memoryPtr = memory;
+
+    // Initialize registers pointer
     registersPtr = registers;
+
+    // Initialize MemoryIO pointer
     memoryIOPtr = memoryIO;
+
+    // Initialize CPU pointer
     cpuPtr = cpu;
 }
 
 
 /**
- * @brief Sign extends a given immediate number.
- * @param immNumber: The immediate number to sign extend.
- * @param immNumberLength: The length of the immediate number in bits.
- * @return The sign extended immediate number.
+ * @brief Sign-extends the given immediate number.
+ *
+ * This method sign-extends the given immediate number to preserve its sign bit
+ * when it is represented in a wider bit length, determined by immNumberLength.
+ *
+ * @param immNumber The immediate number to be sign-extended.
+ * @param immNumberLength The length of the immediate number in bits.
+ * @return The sign-extended immediate number.
  */
 uint16_t ArithmeticLogicUnit::SignExtend(uint16_t immNumber, int immNumberLength) const
 {
@@ -24,8 +45,9 @@ uint16_t ArithmeticLogicUnit::SignExtend(uint16_t immNumber, int immNumberLength
     int signBit = (immNumber >> (immNumberLength - 1)) & 0x0001;
 
     // If the sign bit is set, perform sign extension
-    if (signBit)
+    if (signBit) // If sign bit is 1
     {
+        // Extend the sign bit to the left to fill remaining bits with 1s
         return immNumber | (0xFFFF << immNumberLength);
     }
 
@@ -36,19 +58,25 @@ uint16_t ArithmeticLogicUnit::SignExtend(uint16_t immNumber, int immNumberLength
 
 /**
  * @brief Swaps the byte order of a 16-bit value.
+ *
  * This function reverses the byte order of the input 16-bit value.
- * @param number: The 16-bit value to be swapped.
+ *
+ * @param number The 16-bit value to be swapped.
  * @return The 16-bit value with its byte order swapped.
  */
 uint16_t ArithmeticLogicUnit::Swap16(uint16_t number)
 {
+    // Shift the number 8 bits to the left and combine it with the number shifted 8 bits to the right
     return (number << 8) | (number >> 8);
 }
 
 
 /**
  * @brief Performs an addition operation based on the provided instruction.
- * @param instruction: The 16-bit instruction.
+ *
+ * This function extracts operands from the instruction and performs addition.
+ *
+ * @param instruction The 16-bit instruction.
  */
 void ArithmeticLogicUnit::ADD(uint16_t instruction)
 {
@@ -61,7 +89,7 @@ void ArithmeticLogicUnit::ADD(uint16_t instruction)
     {
         // If Immediate Flag is set, extract immediate value and perform addition
         uint16_t imm5 = (instruction) & 0x001F;
-        imm5 = SignExtend(imm5, 5);
+        imm5 = SignExtend(imm5, 5); // Sign-extend the immediate value
         registersPtr[DR] = registersPtr[SR1] + imm5;
     }
     else
@@ -78,7 +106,7 @@ void ArithmeticLogicUnit::ADD(uint16_t instruction)
 
 /**
  * @brief Performs a bitwise AND operation based on the provided instruction.
- * @param instruction: The 16-bit instruction.
+ * @param instruction The 16-bit instruction.
  */
 void ArithmeticLogicUnit::AND(uint16_t instruction)
 {
@@ -91,7 +119,7 @@ void ArithmeticLogicUnit::AND(uint16_t instruction)
     {
         // If Immediate Flag is set, extract immediate value and perform bitwise AND
         uint16_t imm5 = (instruction) & 0x001F;
-        imm5 = SignExtend(imm5, 5);
+        imm5 = SignExtend(imm5, 5); // Sign-extend the immediate value
         registersPtr[DR] = registersPtr[SR1] & imm5;
     }
     else
@@ -108,7 +136,7 @@ void ArithmeticLogicUnit::AND(uint16_t instruction)
 
 /**
  * @brief Performs a bitwise NOT operation based on the provided instruction.
- * @param instruction: The 16-bit instruction.
+ * @param instruction The 16-bit instruction.
  */
 void ArithmeticLogicUnit::NOT(uint16_t instruction)
 {
@@ -126,7 +154,7 @@ void ArithmeticLogicUnit::NOT(uint16_t instruction)
 
 /**
  * @brief Performs a branch operation based on the provided instruction.
- * @param instruction: The 16-bit instruction.
+ * @param instruction The 16-bit instruction.
  */
 void ArithmeticLogicUnit::BR(uint16_t instruction)
 {
@@ -158,7 +186,7 @@ void ArithmeticLogicUnit::JMP(uint16_t instruction)
 
 /**
  * @brief Performs a jump to subroutine operation based on the provided instruction.
- * @param instruction: The 16-bit instruction.
+ * @param instruction The 16-bit instruction.
  */
 void ArithmeticLogicUnit::JSR(uint16_t instruction)
 {
@@ -185,7 +213,7 @@ void ArithmeticLogicUnit::JSR(uint16_t instruction)
 
 /**
  * @brief Performs a load operation based on the provided instruction.
- * @param instruction: The 16-bit instruction.
+ * @param instruction The 16-bit instruction.
  */
 void ArithmeticLogicUnit::LD(uint16_t instruction)
 {
@@ -203,7 +231,7 @@ void ArithmeticLogicUnit::LD(uint16_t instruction)
 
 /**
  * @brief Performs a load from base register with offset operation based on the provided instruction.
- * @param instruction: The 16-bit instruction.
+ * @param instruction The 16-bit instruction.
  */
 void ArithmeticLogicUnit::LDR(uint16_t instruction)
 {
@@ -222,7 +250,7 @@ void ArithmeticLogicUnit::LDR(uint16_t instruction)
 
 /**
  * @brief Performs a load effective address operation based on the provided instruction.
- * @param instruction: The 16-bit instruction.
+ * @param instruction The 16-bit instruction.
  */
 void ArithmeticLogicUnit::LEA(uint16_t instruction)
 {
@@ -240,7 +268,7 @@ void ArithmeticLogicUnit::LEA(uint16_t instruction)
 
 /**
  * @brief Performs a store operation based on the provided instruction.
- * @param instruction: The 16-bit instruction.
+ * @param instruction The 16-bit instruction.
  */
 void ArithmeticLogicUnit::ST(uint16_t instruction)
 {
@@ -255,7 +283,7 @@ void ArithmeticLogicUnit::ST(uint16_t instruction)
 
 /**
  * @brief Performs an indirect store operation based on the provided instruction.
- * @param instruction: The 16-bit instruction.
+ * @param instruction The 16-bit instruction.
  */
 void ArithmeticLogicUnit::STI(uint16_t instruction)
 {
@@ -271,7 +299,7 @@ void ArithmeticLogicUnit::STI(uint16_t instruction)
 
 /**
  * @brief Performs a store register operation based on the provided instruction.
- * @param instruction: The 16-bit instruction.
+ * @param instruction The 16-bit instruction.
  */
 void ArithmeticLogicUnit::STR(uint16_t instruction)
 {
@@ -287,7 +315,7 @@ void ArithmeticLogicUnit::STR(uint16_t instruction)
 
 /**
  * @brief Performs a load indirect operation based on the provided instruction.
- * @param instruction: The 16-bit instruction.
+ * @param instruction The 16-bit instruction.
  */
 void ArithmeticLogicUnit::LDI(uint16_t instruction)
 {

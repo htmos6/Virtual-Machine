@@ -1,4 +1,6 @@
 #define _CRT_SECURE_NO_DEPRECATE
+
+
 #include <iostream>
 
 
@@ -9,53 +11,67 @@
 #include "CPU.h"
 
 
+/**
+ * @brief Initializes the CPU object.
+ *
+ * This constructor initializes the CPU object by setting the default condition flag to zero
+ * and setting the Program Counter (PC) to the starting position.
+ */
 CPU::CPU()
 {
-	// Since exactly one condition flag is settled at any given time, set the Z flag.
-	registers[Registers::R_COND] = ConditionFlags::FL_ZERO;
+    // Set the default condition flag to zero
+    registers[Registers::R_COND] = ConditionFlags::FL_ZERO;
 
-	// Set the PC to starting position
-	// PC_START = 0x3000 is the default
-	registers[Registers::R_PC] = 0x3000;
+    // Set the Program Counter (PC) to the starting position (default: 0x3000)
+    registers[Registers::R_PC] = PC::PC_START;
 }
 
 
+/**
+ * @brief Destroys the CPU object.
+ *
+ * This destructor does not perform any specific actions as the CPU object is being destroyed.
+ */
 CPU::~CPU()
 {
 }
 
 
-
 /**
  * @brief Updates the condition flags based on the value in the specified register.
- * @param DR: The index of the destination register whose value is used to update the flags.
+ *
+ * This function updates the condition flags based on the value stored in the specified destination register.
+ *
+ * @param DR The index of the destination register whose value is used to update the flags.
  */
 void CPU::UpdateFlags(uint16_t DR)
 {
     if (registers[DR] == 0)
     {
-        // Set zero flag if the value in the register is zero
+        // Set the zero flag if the value in the register is zero
         registers[Registers::R_COND] = ConditionFlags::FL_ZERO;
     }
-    // Check if the leftmost bit indicates negative for a 16-bit number
     else if ((registers[DR] >> 15) == 1)
     {
-        // Set negative flag if the leftmost bit is 1
+        // Set the negative flag if the leftmost bit is 1
         registers[Registers::R_COND] = ConditionFlags::FL_NEGATIVE;
     }
     else
     {
-        // Set positive flag if neither zero nor negative conditions are met
+        // Set the positive flag if neither zero nor negative conditions are met
         registers[Registers::R_COND] = ConditionFlags::FL_POSITIVE;
     }
 }
 
 
 /**
- * @brief Reads the contents of an image file and stores contents in the memory array.
- * This function reads the contents of the image file pointed to by the given file pointer
- * and stores them in memory, starting from the specified origin.
- * @param file: Pointer to the image file to be read.
+ * @brief Reads the contents of an image file and stores them in the memory array.
+ *
+ * This function reads the contents of the specified image file and stores them in the memory array
+ * starting from the specified origin address. It also performs byte order conversion as necessary.
+ *
+ * @param file Pointer to the image file to be read.
+ * @param alu Pointer to the ArithmeticLogicUnit object used for byte swapping.
  */
 void CPU::ReadImageFile(FILE* file, ArithmeticLogicUnit* alu)
 {
@@ -79,19 +95,21 @@ void CPU::ReadImageFile(FILE* file, ArithmeticLogicUnit* alu)
     // Read the contents of the file into memory
     size_t read = fread(p, sizeof(uint16_t), maxRead, file);
 
+    // Convert each read value to little endian format
     while (read-- > 0)
     {
-        // Convert each read value to little endian format
         *p = alu->Swap16(*p);
-        ; // Move to the next memory location
-        ++p;
+        ++p; // Move to the next memory location
     }
 }
 
 
 /**
  * @brief Opens the specified image file and reads its contents into memory.
- * @param imagePath: The path to the image file to be read.
+ *
+ * This function opens the image file specified by the provided path and reads its contents into memory.
+ *
+ * @param imagePath The path to the image file to be read.
  * @return Returns 1 if the image file was successfully read into memory, 0 otherwise.
  */
 int CPU::ReadImage(const char* imagePath, ArithmeticLogicUnit* alu)
@@ -100,7 +118,10 @@ int CPU::ReadImage(const char* imagePath, ArithmeticLogicUnit* alu)
     FILE* file = fopen(imagePath, "rb");
 
     // Check if the file was successfully opened. If not, return 0 to indicate failure.
-    if (!file) { return 0; };
+    if (!file)
+    {
+        return 0;
+    }
 
     // Call the ReadImageFile function to read the contents of the image file into memory
     ReadImageFile(file, alu);
@@ -110,5 +131,4 @@ int CPU::ReadImage(const char* imagePath, ArithmeticLogicUnit* alu)
 
     // Return 1 to indicate that the image file was successfully read into memory
     return 1;
-
 }

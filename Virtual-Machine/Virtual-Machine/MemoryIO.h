@@ -8,6 +8,13 @@
 class OS;
 
 
+enum MemoryMappedRegisters : uint16_t
+{
+	MR_KBSR = 0xFE00, // keyboard status
+	MR_KBDR = 0xFE02  // keyboard data
+};
+
+
 class MemoryIO
 {
 private:

@@ -14,8 +14,8 @@ Trap::Trap(uint16_t* memory, uint16_t* registers, CPU* cpu)
  * @brief Executes 16 bits of instruction by handling different trap vectors.
  * This function processes trap instructions by switching based on the trap vector
  * and invoking corresponding trap handling functions.
- * @param cpu: Reference to the CPU object used to control the virtual machine's operation.
- * @param instruction: The 16 bits of instruction to execute.
+ *
+ * @param instruction The 16 bits of instruction to execute.
  */
 void Trap::Proxy(uint16_t instruction)
 {
@@ -46,11 +46,11 @@ void Trap::Proxy(uint16_t instruction)
     }
 }
 
+
 /**
  * @brief Reads a character from the console and stores it in register R0.
  * This function prompts the user to enter a character from the console
  * and stores the ASCII value of the character in register R0.
- * @param cpu: Reference to the CPU object used to control the virtual machine's operation.
  */
 void Trap::GETC()
 {
@@ -60,10 +60,10 @@ void Trap::GETC()
     cpuPtr->UpdateFlags(Registers::R_0);
 }
 
+
 /**
  * @brief Outputs a character stored in register R0 to the console.
  * This function outputs the character stored in register R0 to the console.
- * @param cpu Reference to the CPU object used to control the virtual machine's operation.
  */
 void Trap::OUTC()
 {
@@ -73,11 +73,11 @@ void Trap::OUTC()
     fflush(stdout);
 }
 
+
 /**
  * @brief Outputs a string stored in memory starting at the address in register R0 to the console.
  * This function outputs a null-terminated string stored in memory
  * starting at the address specified in register R0 to the console.
- * @param cpu Reference to the CPU object used to control the virtual machine's operation.
  */
 void Trap::PUTS()
 {
@@ -94,11 +94,11 @@ void Trap::PUTS()
     fflush(stdout);
 }
 
+
 /**
  * @brief Reads a character from the console and stores it in register R0.
  * This function prompts the user to enter a character from the console
  * and stores the ASCII value of the character in register R0.
- * @param cpu Reference to the CPU object used to control the virtual machine's operation.
  */
 void Trap::INC()
 {
@@ -116,11 +116,11 @@ void Trap::INC()
     cpuPtr->UpdateFlags(Registers::R_0);
 }
 
+
 /**
  * @brief Outputs a string stored in memory starting at the address in register R0 to the console.
  * This function outputs a null-terminated string stored in memory
  * starting at the address specified in register R0 to the console.
- * @param cpu Reference to the CPU object used to control the virtual machine's operation.
  */
 void Trap::PUTSP()
 {
@@ -144,11 +144,11 @@ void Trap::PUTSP()
     fflush(stdout);
 }
 
+
 /**
  * @brief Halts the execution of the virtual machine.
  * This function prints "HALT" to the console and sets the 'running' flag of the CPU object to false,
  * indicating that the virtual machine should stop execution.
- * @param cpu Reference to the CPU object used to control the virtual machine's operation.
  */
 void Trap::HALT()
 {

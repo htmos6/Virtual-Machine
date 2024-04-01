@@ -8,11 +8,11 @@
 
 VirtualMachine::VirtualMachine(CPU* cpu, OS* os, Trap* trap, MemoryIO* memoryIO, ArithmeticLogicUnit* alu)
 {
-	cpuPtr = cpu;
-	osPtr = os;
-	trapPtr = trap;
-	memoryIOPtr = memoryIO;
-	aluPtr = alu;
+    cpuPtr = cpu;
+    osPtr = os;
+    trapPtr = trap;
+    memoryIOPtr = memoryIO;
+    aluPtr = alu;
 }
 
 
@@ -38,11 +38,11 @@ void VirtualMachine::RunVirtualMachine(int argc, const char* argv[])
         }
     }
 
-	// Set up a signal handler for interrupt signal (Ctrl+C)
-	signal(SIGINT, OS::HandleInterruptWrapper);
+    // Set up a signal handler for interrupt signal (Ctrl+C)
+    signal(SIGINT, OS::HandleInterruptWrapper);
 
-	// Disable input buffering to allow direct console input
-	osPtr->DisableInputBuffering();
+    // Disable input buffering to allow direct console input
+    osPtr->DisableInputBuffering();
 
     while (cpuPtr->running)
     {
@@ -55,53 +55,53 @@ void VirtualMachine::RunVirtualMachine(int argc, const char* argv[])
 
         switch (operation)
         {
-            case OP_ADD:
-                aluPtr->ADD(instruction);
-                break;
-            case OP_AND:
-                aluPtr->AND(instruction);
-                break;
-            case OP_NOT:
-                aluPtr->NOT(instruction);
-                break;
-            case OP_BR:
-                aluPtr->BR(instruction);
-                break;
-            case OP_JMP:
-                aluPtr->JMP(instruction);
-                break;
-            case OP_JSR:
-                aluPtr->JSR(instruction);
-                break;
-            case OP_LD:
-                aluPtr->LD(instruction);
-                break;
-            case OP_LDI:
-                aluPtr->LDI(instruction);
-                break;
-            case OP_LDR:
-                aluPtr->LDR(instruction);
-                break;
-            case OP_LEA:
-                aluPtr->LEA(instruction);
-                break;
-            case OP_ST:
-                aluPtr->ST(instruction);
-                break;
-            case OP_STI:
-                aluPtr->STI(instruction);
-                break;
-            case OP_STR:
-                aluPtr->STR(instruction);
-                break;
-            case OP_TRAP:
-                trapPtr->Proxy(instruction);
-                break;
-            case OP_RES:
-            case OP_RTI:
-            default:
-                abort();
-                break;
+        case OP_ADD:
+            aluPtr->ADD(instruction);
+            break;
+        case OP_AND:
+            aluPtr->AND(instruction);
+            break;
+        case OP_NOT:
+            aluPtr->NOT(instruction);
+            break;
+        case OP_BR:
+            aluPtr->BR(instruction);
+            break;
+        case OP_JMP:
+            aluPtr->JMP(instruction);
+            break;
+        case OP_JSR:
+            aluPtr->JSR(instruction);
+            break;
+        case OP_LD:
+            aluPtr->LD(instruction);
+            break;
+        case OP_LDI:
+            aluPtr->LDI(instruction);
+            break;
+        case OP_LDR:
+            aluPtr->LDR(instruction);
+            break;
+        case OP_LEA:
+            aluPtr->LEA(instruction);
+            break;
+        case OP_ST:
+            aluPtr->ST(instruction);
+            break;
+        case OP_STI:
+            aluPtr->STI(instruction);
+            break;
+        case OP_STR:
+            aluPtr->STR(instruction);
+            break;
+        case OP_TRAP:
+            trapPtr->Proxy(instruction);
+            break;
+        case OP_RES:
+        case OP_RTI:
+        default:
+            abort();
+            break;
         }
     }
 

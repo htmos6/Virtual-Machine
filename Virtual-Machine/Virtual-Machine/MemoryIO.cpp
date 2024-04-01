@@ -3,6 +3,14 @@
 #include "OS.h"
 
 
+/**
+ * @brief Constructs a MemoryIO object.
+ *
+ * This constructor initializes a MemoryIO object with the provided memory array and OS pointer.
+ *
+ * @param memory Pointer to the memory array.
+ * @param os Pointer to the OS object.
+ */
 MemoryIO::MemoryIO(uint16_t* memory, OS* os)
 {
     memoryPtr = memory;
@@ -11,9 +19,14 @@ MemoryIO::MemoryIO(uint16_t* memory, OS* os)
 
 
 /**
- * @brief Reads the 16 bits value from memory at the specified address.
- * @param memoryAddress: The address to read from.
- * @return The 16 bits value read from memory.
+ * @brief Reads the 16-bit value from memory at the specified address.
+ *
+ * This function reads a 16-bit value from memory at the specified address.
+ * If the address corresponds to the keyboard status register, it checks if a key is pressed
+ * and updates the keyboard status register accordingly.
+ *
+ * @param memoryAddress The address to read from.
+ * @return The 16-bit value read from memory.
  */
 uint16_t MemoryIO::Read(uint16_t memoryAddress)
 {
@@ -41,8 +54,11 @@ uint16_t MemoryIO::Read(uint16_t memoryAddress)
 
 /**
  * @brief Writes the 16-bit value to memory at the specified address.
- * @param address: The address to write to.
- * @param value: The 16-bit value to write.
+ *
+ * This function writes a 16-bit value to memory at the specified address.
+ *
+ * @param address The address to write to.
+ * @param value The 16-bit value to write.
  */
 void MemoryIO::Write(uint16_t address, uint16_t value)
 {

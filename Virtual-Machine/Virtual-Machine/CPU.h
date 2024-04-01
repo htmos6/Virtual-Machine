@@ -26,27 +26,6 @@ class MemoryIO;
 class OS;
 
 
-enum Opcodes : uint16_t
-{
-    OP_BR = 0, // branch
-    OP_ADD,    // add 
-    OP_LD,     // load
-    OP_ST,     // store
-    OP_JSR,    // jump register
-    OP_AND,    // bitwise and
-    OP_LDR,    // load register
-    OP_STR,    // store register
-    OP_RTI,    // unused
-    OP_NOT,    // bitwise not
-    OP_LDI,    // load indirect
-    OP_STI,    // store indirect
-    OP_JMP,    // jump
-    OP_RES,    // reserved (unused)
-    OP_LEA,    // load effective address
-    OP_TRAP    // execute trap
-};
-
-
 enum ConditionFlags : uint16_t
 {
     // The condition flags represent the state of a computation's result.
@@ -79,35 +58,34 @@ enum Registers : uint16_t
 };
 
 
-enum MemoryMappedRegisters : uint16_t
+enum PC : uint16_t
 {
-    MR_KBSR = 0xFE00, // keyboard status
-    MR_KBDR = 0xFE02  // keyboard data
+    PC_START = 0x3000
 };
 
 
 class CPU
 {
-    public:
-        // Array to store 16-bit registers.
-		uint16_t registers[REGISTER_COUNT];
+public:
+    // Array to store 16-bit registers.
+	uint16_t registers[REGISTER_COUNT];
 
-        // Ensure that each element of the "memory" array stores 16 bits of data.
-        // If "uint16_t" is not explicitly specified (and "int" is used instead), 
-        // the size of each element might vary depending on the compiler and system,
-        // potentially being interpreted as either 16 or 32 bits.
-        uint16_t memory[MEMORY_MAX];
+    // Ensure that each element of the "memory" array stores 16 bits of data.
+    // If "uint16_t" is not explicitly specified (and "int" is used instead), 
+    // the size of each element might vary depending on the compiler and system,
+    // potentially being interpreted as either 16 or 32 bits.
+    uint16_t memory[MEMORY_MAX];
 
-        // Boolean flag to control the execution state of the Virtual Machine.
-        int running = 1;
+    // Boolean flag to control the execution state of the Virtual Machine.
+    int running = 1;
 
-	public:
-		CPU();
-        ~CPU();
+public:
+	CPU();
+    ~CPU();
 		
-        void UpdateFlags(uint16_t DR);
+    void UpdateFlags(uint16_t DR);
 
-        void ReadImageFile(FILE* file, ArithmeticLogicUnit* alu);
-        int ReadImage(const char* imagePath, ArithmeticLogicUnit* alu);
+    void ReadImageFile(FILE* file, ArithmeticLogicUnit* alu);
+    int ReadImage(const char* imagePath, ArithmeticLogicUnit* alu);
 };
 #endif

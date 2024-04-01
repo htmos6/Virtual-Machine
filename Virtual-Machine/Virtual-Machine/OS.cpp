@@ -9,6 +9,11 @@
 #include <conio.h>  // _kbhit
 
 
+/**
+ * @brief Constructs an instance of the OS class.
+ *
+ * This constructor does not perform any specific initialization.
+ */
 OS::OS()
 {
 
@@ -17,11 +22,12 @@ OS::OS()
 
 /**
  * @brief Disables input buffering for console input.
+ *
  * This function modifies the console input mode to disable input echo and to return
- * when one or more characters are available.
- * Input buffering refers to the process of collecting input characters before
- * they are sent to the application, allowing for the processing of multiple characters
- * at once. Disabling buffering allows for immediate response to user input.
+ * when one or more characters are available. Disabling buffering allows for immediate response to user input.
+ *
+ * @remark Input buffering refers to the process of collecting input characters before they are sent to the application,
+ * allowing for the processing of multiple characters at once.
  */
 void OS::DisableInputBuffering()
 {
@@ -33,11 +39,8 @@ void OS::DisableInputBuffering()
 
     // Calculate the new console input mode by toggling flags
     // Disabling ENABLE_ECHO_INPUT prevents characters from being echoed (reflecting) back to the screen
-    // Disabling ENABLE_LINE_INPUT allows input functions to return immediately when
-    // characters are available for reading, rather than waiting for the Enter key.
-    //
-    // Example: In a game where ENABLE_LINE_INPUT is used, pressing 'A' by the player
-    // triggers an immediate action such as moving the character to the left.
+    // Disabling ENABLE_LINE_INPUT allows input functions to return immediately when characters are available for reading,
+    // rather than waiting for the Enter key.
     fdwMode = fdwOldMode
         ^ ENABLE_ECHO_INPUT  // Disable input echo
         ^ ENABLE_LINE_INPUT; // Enable immediate return when characters are available
@@ -46,14 +49,14 @@ void OS::DisableInputBuffering()
     SetConsoleMode(hStdin, fdwMode);
 
     // Clear the input buffer to discard any pending input
-    // This ensures that any characters typed before changing the mode
-    // are not processed by the application
+    // This ensures that any characters typed before changing the mode are not processed by the application
     FlushConsoleInputBuffer(hStdin);
 }
 
 
 /**
  * @brief Restores the previous input buffering settings.
+ *
  * This function sets the console input mode back to the old mode.
  */
 void OS::RestoreInputBuffering()
@@ -64,6 +67,9 @@ void OS::RestoreInputBuffering()
 
 /**
  * @brief Checks if a key is pressed within a specified timeout.
+ *
+ * This function checks if a key is pressed within a specified timeout.
+ *
  * @return True if a key is pressed within the timeout, false otherwise.
  */
 uint16_t OS::CheckKey()
@@ -74,8 +80,11 @@ uint16_t OS::CheckKey()
 
 /**
  * @brief Handles an interrupt signal.
+ *
  * This function restores the input buffering settings, prints a newline character,
  * and exits the program with a specific exit code (-2).
+ *
+ * @param signal The interrupt signal.
  */
 void OS::HandleInterrupt(int signal)
 {
@@ -85,7 +94,14 @@ void OS::HandleInterrupt(int signal)
 }
 
 
-// Static function to act as a wrapper
+/**
+ * @brief Static function to act as a wrapper for handling interrupt signals.
+ *
+ * This static function creates an instance of the OS class and calls the HandleInterrupt method on it,
+ * passing the provided signal as a parameter.
+ *
+ * @param signal The interrupt signal.
+ */
 void OS::HandleInterruptWrapper(int signal)
 {
     OS osWrapper;
