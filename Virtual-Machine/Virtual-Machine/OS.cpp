@@ -1,3 +1,13 @@
+/*
+Author: Mehmet Arslan
+GitHub: https://github.com/htmos6
+
+This code is licensed under the MIT License.
+
+Copyright © 2024 Mehmet Arslan
+*/
+
+
 #include "OS.h"
 
 #include <cstdint>

@@ -1,7 +1,27 @@
+/*
+Author: Mehmet Arslan
+GitHub: https://github.com/htmos6
+
+This code is licensed under the MIT License.
+
+Copyright © 2024 Mehmet Arslan
+*/
+
+
 #include "Trap.h"
 #include "CPU.h"
 
 
+/**
+ * @brief Constructs a Trap object with references to memory, registers, and CPU.
+ *
+ * This constructor initializes the Trap object with references to the memory, registers,
+ * and CPU components of the virtual machine.
+ *
+ * @param memory Pointer to the memory array of the virtual machine.
+ * @param registers Pointer to the registers array of the virtual machine.
+ * @param cpu Pointer to the CPU object controlling the virtual machine's operation.
+ */
 Trap::Trap(uint16_t* memory, uint16_t* registers, CPU* cpu)
 {
     memoryPtr = memory;
